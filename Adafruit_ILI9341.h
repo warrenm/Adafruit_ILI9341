@@ -1,30 +1,29 @@
 /***************************************************
-  This is our library for the Adafruit  ILI9341 Breakout and Shield
-  ----> http://www.adafruit.com/products/1651
-
-  Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.
-  MIT license, all text above must be included in any redistribution
+ This is our library for the Adafruit  ILI9341 Breakout and Shield
+ ----> http://www.adafruit.com/products/1651
+ 
+ Check out the links above for our tutorials and wiring diagrams
+ These displays use SPI to communicate, 4 or 5 pins are required to
+ interface (RST is optional)
+ Adafruit invests time and resources providing this open source code,
+ please support Adafruit and open-source hardware by purchasing
+ products from Adafruit!
+ 
+ Written by Limor Fried/Ladyada for Adafruit Industries.
+ MIT license, all text above must be included in any redistribution
  ****************************************************/
 
 #ifndef _ADAFRUIT_ILI9341H_
 #define _ADAFRUIT_ILI9341H_
 
 #if ARDUINO >= 100
- #include "Arduino.h"
- #include "Print.h"
+#include "Arduino.h"
+#include "Print.h"
 #else
- #include "WProgram.h"
+#include "WProgram.h"
 #endif
 #include <Adafruit_GFX.h>
 #include <avr/pgmspace.h>
-
 
 #define ILI9341_TFTWIDTH  240
 #define ILI9341_TFTHEIGHT 320
@@ -81,10 +80,6 @@
 
 #define ILI9341_GMCTRP1 0xE0
 #define ILI9341_GMCTRN1 0xE1
-/*
-#define ILI9341_PWCTR6  0xFC
-
-*/
 
 // Color definitions
 #define	ILI9341_BLACK   0x0000
@@ -93,62 +88,44 @@
 #define	ILI9341_GREEN   0x07E0
 #define ILI9341_CYAN    0x07FF
 #define ILI9341_MAGENTA 0xF81F
-#define ILI9341_YELLOW  0xFFE0  
+#define ILI9341_YELLOW  0xFFE0
 #define ILI9341_WHITE   0xFFFF
 
+class Adafruit_ILI9341 : public Adafruit_GFX
+{
+public:
 
-class Adafruit_ILI9341 : public Adafruit_GFX {
+    Adafruit_ILI9341(int8_t _CS, int8_t _DC, int8_t _RST = -1);
+    
+    virtual void begin(void);
+    virtual void setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+    virtual void pushColor(uint16_t color);
+    virtual void fillScreen(uint16_t color);
+    virtual void drawPixel(int16_t x, int16_t y, uint16_t color);
+    virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+    virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+    virtual void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+    virtual void setRotation(uint8_t r);
+    virtual void invertDisplay(boolean i);
+    uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
+    
+    /* These are not for current use, 8-bit protocol only! */
+    uint8_t readdata(void);
+    uint8_t readcommand8(uint8_t reg, uint8_t index = 0);
+    
+    void spiwrite(uint8_t);
+    void writecommand(uint8_t c);
+    void writedata(uint8_t d);
+    void commandList(uint8_t *addr);
+    uint8_t spiread(void);
+    
+protected:
+    void spi_begin(void);
+    void spi_end(void);
 
- public:
-
-  Adafruit_ILI9341(int8_t _CS, int8_t _DC, int8_t _MOSI, int8_t _SCLK,
-		   int8_t _RST, int8_t _MISO);
-  Adafruit_ILI9341(int8_t _CS, int8_t _DC, int8_t _RST = -1);
-
-  void     begin(void),
-           setAddrWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1),
-           pushColor(uint16_t color),
-           fillScreen(uint16_t color),
-           drawPixel(int16_t x, int16_t y, uint16_t color),
-           drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color),
-           drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color),
-           fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
-             uint16_t color),
-           setRotation(uint8_t r),
-           invertDisplay(boolean i);
-  uint16_t color565(uint8_t r, uint8_t g, uint8_t b);
-
-  /* These are not for current use, 8-bit protocol only! */
-  uint8_t  readdata(void),
-    readcommand8(uint8_t reg, uint8_t index = 0);
-  /*
-  uint16_t readcommand16(uint8_t);
-  uint32_t readcommand32(uint8_t);
-  void     dummyclock(void);
-  */  
-
-  void     spiwrite(uint8_t),
-    writecommand(uint8_t c),
-    writedata(uint8_t d),
-    commandList(uint8_t *addr);
-  uint8_t  spiread(void);
-
- private:
-  uint8_t  tabcolor;
-
-
-
-  boolean  hwSPI;
-#if defined (__AVR__) || defined(TEENSYDUINO)
-  uint8_t mySPCR;
-  volatile uint8_t *mosiport, *clkport, *dcport, *rsport, *csport;
-  int8_t  _cs, _dc, _rst, _mosi, _miso, _sclk;
-  uint8_t  mosipinmask, clkpinmask, cspinmask, dcpinmask;
-#elif defined (__arm__)
-    volatile RwReg *mosiport, *clkport, *dcport, *rsport, *csport;
-    uint32_t  _cs, _dc, _rst, _mosi, _miso, _sclk;
-    uint32_t  mosipinmask, clkpinmask, cspinmask, dcpinmask;
-#endif
+    uint8_t  tabcolor;
+    uint8_t mySPCR;
+    int8_t  _cs, _dc, _rst;
 };
 
 #endif

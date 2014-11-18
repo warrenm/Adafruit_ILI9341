@@ -1,3 +1,11 @@
+This is a modified version of the Adafruit ILI9341 library that introduces support for the Intel Galileo Gen 2 board, along with substantial speed improvements.
+
+`Adafruit_ILI9341Buffered` is a subclass of `Adafruit_GFX` that manages a framebuffer instead of writing individual pixels via the SPI interface. This requires that the programmer call `presentBuffer` whenever the screen needs to update, but results in performance that outstrips the stock library by 100-900x, depending on the task.
+
+Only the “graphicstest” example is known to work. I am not aware of a Galileo-compatible library for the STMPE610 touchscreen interface.
+
+======== ORIGINAL README FOLLOWS ========
+
 This is a library for the Adafruit ILI9341 display products
 
 This library works with the Adafruit 2.8" Touch Shield V2 (SPI)
